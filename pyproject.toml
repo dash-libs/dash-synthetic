@@ -14,7 +14,7 @@ keywords = ["databricks", "synthetic-data", "pyspark", "delta"]
 dependencies = ["ipywidgets>=8.0", "numpy>=1.24"]
 
 [project.optional-dependencies]
-dev = ["pytest", "pytest-cov", "hatch"]
+dev = ["pytest", "pytest-cov", "hatch", "pdoc", "ruff"]
 
 [project.urls]
 Homepage = "https://github.com/darshan-innovation/dash-synthetic"
