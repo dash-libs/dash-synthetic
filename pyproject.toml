@@ -18,3 +18,6 @@ dev = ["pytest", "pytest-cov", "hatch", "pdoc", "ruff"]
 
 [project.urls]
 Homepage = "https://github.com/darshan-innovation/dash-synthetic"
+
+[tool.hatch.build.targets.wheel]
+packages = ["dashsynthetic"]
