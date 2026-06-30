@@ -7,7 +7,8 @@ Synthetic data generation from real Databricks tables. generator.py=generation A
 (`SyntheticGenerator` single-table, `MultiTableGenerator` multi-table), profiler.py=source
 profiling, engine.py=numpy-based correlated sampling, relationships.py=`RelationshipGraph`
 (tables, primary/foreign keys, master data columns, dependency order), multi_engine.py=
-FK-aware multi-table orchestration. UI widgets come from the shared `dash-ui` package.
+FK-aware multi-table orchestration. UI widgets come from the shared `dashui` package
+(PyPI distribution name `dash-uis` — `dash-ui` was already taken).
 
 ## Structure
 - `/ui.py`            — ipywidgets UI (Single Table + Multi-Table Relationships tabs), `launch()` entrypoint
@@ -21,7 +22,7 @@ FK-aware multi-table orchestration. UI widgets come from the shared `dash-ui` pa
 - UI calls core classes; never contains business logic
 - `launch()` is always the public entrypoint for business users
 - Reusable widgets (header, source picker, output panel, schema lookups) come from `dashui`
-  — don't reimplement them locally; add new generic widgets to `dash-ui` instead
+  — don't reimplement them locally; add new generic widgets to the `dash-ui` repo (PyPI: `dash-uis`) instead
 - Foreign-key columns are sampled from the parent table's *already-generated* primary key
   values (`pk_pools` in `multi_engine.py`), so generation order matters — always go through
   `RelationshipGraph.generation_order()` rather than an arbitrary table order
