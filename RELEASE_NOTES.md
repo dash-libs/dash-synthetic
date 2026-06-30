@@ -1,10 +1,10 @@
-## DashSynthetic — Synthetic Data v0.1.1
+## DashSynthetic — Synthetic Data v0.1.2
 
 **Released:** 2026-06-30
-**Previous:** v0.1.0
+**Previous:** v0.1.1
 
 ### Notes
-Initial public release — multi-table relationship configuration (PK/FK, master data columns) on top of single-table synthetic data generation
+Repo hygiene, multi-table relationship feature, screenshots
 
 ### What's included
 - All tests passing across Python 3.9, 3.10, 3.11, 3.12
@@ -13,12 +13,12 @@ Initial public release — multi-table relationship configuration (PK/FK, master
 
 ### Install
 ```bash
-pip install dash-synthetic==0.1.1
+pip install dash-synthetic==0.1.2
 ```
 
 ### Quick Start (Databricks notebook)
 ```python
-%pip install dash-synthetic==0.1.1
+%pip install dash-synthetic==0.1.2
 import dashsynthetic
 dashsynthetic.launch()
 ```
