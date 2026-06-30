@@ -1,10 +1,10 @@
-# Dashsynthetic — Databricks Library
+# DashSynthetic — Databricks Library
 
-[![CI](https://github.com/darshan-innovation/dash-synthetic/actions/workflows/ci.yml/badge.svg)](https://github.com/darshan-innovation/dash-synthetic/actions)
+[![CI](https://github.com/dash-libs/dash-synthetic/actions/workflows/ci.yml/badge.svg)](https://github.com/dash-libs/dash-synthetic/actions)
 [![PyPI](https://img.shields.io/pypi/v/dash-synthetic)](https://pypi.org/project/dash-synthetic/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
 
-Part of the **[Dashlibs](https://github.com/darshan-innovation)** suite — Databricks libraries built for business users.
+Part of the **[Dashlibs](https://github.com/dash-libs)** suite — Databricks libraries built for business users.
 
 ## Installation
 
@@ -24,6 +24,16 @@ The UI has two tabs:
 - **Multi-Table Relationships** — define multiple tables, their primary keys, foreign keys, and
   master data columns (e.g. currency/country codes); the tool figures out the dependency order and
   generates every table with referentially valid foreign keys.
+
+## What it looks like
+
+**Single Table** — profile a source and generate synthetic data from it:
+
+![DashSynthetic single-table tab](https://raw.githubusercontent.com/dash-libs/dash-synthetic/main/docs/screenshots/single_table.png)
+
+**Multi-Table Relationships** — define tables, primary/foreign keys, and master data columns:
+
+![DashSynthetic multi-table relationships tab](https://raw.githubusercontent.com/dash-libs/dash-synthetic/main/docs/screenshots/multi_table_relationships.png)
 
 ## Python API
 
@@ -48,10 +58,12 @@ results = gen.run()   # {"Customer": df, "Account": df}, generated in dependency
 |---|---|
 | dash-dq | Data Quality |
 | dash-synthetic | Synthetic Data Generation |
+| dash-observe | Data Observability (freshness, volume, schema) |
 | dash-ml | ML Model Monitoring |
 | dash-ingest | Data Ingestion |
 | dash-gov | Data Governance |
 | dash-relate | Ontology & Lineage for AI |
+| dash-ui | Shared UI components (PyPI: `dash-uis`) |
 
 ## License
 
