@@ -1,6 +1,8 @@
 # CLAUDE.md — dash-synthetic
 
-Part of the **Dashlibs** suite. See ~/dashlibs for the full context.
+Part of the **Dashlibs** suite. Full suite-wide context (release process
+gotchas, PR/review norms, repo list, rationale for past decisions):
+see `~/dashlibs/CLAUDE.md`.
 
 ## Purpose
 Synthetic data generation from real Databricks tables. generator.py=generation API
@@ -32,4 +34,20 @@ FK-aware multi-table orchestration. UI widgets come from the shared `dashui` pac
 ## CI
 - `ci.yml`    — PR gate: lint → test → build
 - `daily.yml` — 06:00 UTC: tests + .health/log.txt commit
-- `release.yml`— Monday 09:00 UTC: patch bump + GitHub release
+- `release.yml`— Monday 09:00 UTC: patch bump (via a release PR) + GitHub release + PyPI
+
+This repo has branch protection requiring **1 approving review** — release
+PRs sit open until a human approves; the wheel build / GitHub Release / PyPI
+publish steps don't block on that PR merging, so the release itself still
+completes.
+
+## Working norms
+- **Every change goes through a PR with real human review before merging —
+  no exceptions**, including the release workflow's own version-bump commit.
+  Don't self-merge, don't lower the required-review count to make automation
+  easier — that defeats the point of requiring review.
+- Prefer small, targeted commits/PRs over large batched ones.
+- README badges previously pointed at `darshan-innovation/dash-synthetic`
+  instead of the actual `dash-libs/dash-synthetic` repo — a leftover from
+  an earlier rename. Check badge URLs match the real remote when scaffolding
+  a new repo from this one.
