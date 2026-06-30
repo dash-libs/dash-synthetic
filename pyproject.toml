@@ -11,7 +11,7 @@ requires-python = ">=3.9"
 license = { text = "Apache-2.0" }
 authors = [{ name = "Darshan Shah", email = "darshan.innovation@icloud.com" }]
 keywords = ["databricks", "synthetic-data", "pyspark", "delta"]
-dependencies = ["ipywidgets>=8.0", "numpy>=1.24"]
+dependencies = ["ipywidgets>=8.0", "numpy>=1.24", "dash-ui>=0.1.0"]
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-cov", "hatch", "pdoc", "ruff"]

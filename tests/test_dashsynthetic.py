@@ -15,3 +15,9 @@ def test_launch_importable():
 def test_main_class_importable():
     from dashsynthetic import SyntheticGenerator
     assert SyntheticGenerator is not None
+
+
+def test_multi_table_generator_importable():
+    from dashsynthetic import MultiTableGenerator, RelationshipGraph
+    assert MultiTableGenerator is not None
+    assert RelationshipGraph is not None

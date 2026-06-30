@@ -1,6 +1,8 @@
 from __future__ import annotations
 from typing import Optional
 
+from dashsynthetic.relationships import RelationshipGraph
+
 
 class SyntheticGenerator:
     """
@@ -76,3 +78,46 @@ class SyntheticGenerator:
                 .saveAsTable(self._output_table)
             print(f"Synthetic data written to {self._output_table}")
         return syn_df
+
+
+class MultiTableGenerator:
+    """
+    Generate synthetic data for several related tables at once, preserving
+    primary/foreign key referential integrity and master-data columns.
+
+    Usage::
+        graph = RelationshipGraph()
+        graph.add_table("Customer", table="catalog.schema.dim_customer", primary_key="customer_id")
+        graph.add_table("Account", table="catalog.schema.fact_account", primary_key="account_id")
+        graph.add_foreign_key("Account", "customer_id", "Customer", "customer_id")
+
+        gen = MultiTableGenerator(graph)
+        gen.configure_table("Customer", n_rows=5000)
+        gen.configure_table("Account", n_rows=20000, output_table="catalog.schema.syn_account")
+        results = gen.run()   # {"Customer": df, "Account": df}
+    """
+
+    def __init__(self, graph: RelationshipGraph):
+        self._graph = graph
+        self._specs: dict = {}
+
+    def configure_table(self, name: str, n_rows: int = 0, preserve_corr: bool = True,
+                        preserve_nulls: bool = True, preserve_distributions: bool = True,
+                        output_table: Optional[str] = None):
+        from dashsynthetic.multi_engine import TableGenSpec
+        self._specs[name] = TableGenSpec(
+            n_rows=n_rows, preserve_corr=preserve_corr, preserve_nulls=preserve_nulls,
+            preserve_distributions=preserve_distributions, output_table=output_table,
+        )
+        return self
+
+    def validate(self) -> list:
+        return self._graph.validate()
+
+    def generation_order(self) -> list:
+        return self._graph.generation_order()
+
+    def run(self) -> dict:
+        """Generate and return {table_name: synthetic DataFrame} in dependency order."""
+        from dashsynthetic.multi_engine import generate_multi
+        return generate_multi(self._graph, self._specs)

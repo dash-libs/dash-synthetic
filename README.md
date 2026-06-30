@@ -19,6 +19,29 @@ import dashsynthetic
 dashsynthetic.launch()   # Opens interactive UI in your Databricks notebook
 ```
 
+The UI has two tabs:
+- **Single Table** — profile a source table/DataFrame/SQL query and generate synthetic data from it.
+- **Multi-Table Relationships** — define multiple tables, their primary keys, foreign keys, and
+  master data columns (e.g. currency/country codes); the tool figures out the dependency order and
+  generates every table with referentially valid foreign keys.
+
+## Python API
+
+```python
+from dashsynthetic import RelationshipGraph, MultiTableGenerator
+
+graph = RelationshipGraph()
+graph.add_table("Customer", table="catalog.schema.dim_customer", primary_key="customer_id")
+graph.add_table("Account", table="catalog.schema.fact_account", primary_key="account_id",
+                master_data_columns=["currency_code"])
+graph.add_foreign_key("Account", "customer_id", "Customer", "customer_id")
+
+gen = MultiTableGenerator(graph)
+gen.configure_table("Customer", n_rows=5000)
+gen.configure_table("Account", n_rows=20000, output_table="catalog.schema.syn_account")
+results = gen.run()   # {"Customer": df, "Account": df}, generated in dependency order
+```
+
 ## Part of Dashlibs
 
 | Library | Purpose |

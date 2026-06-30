@@ -6,22 +6,36 @@ and per-column distribution fitting for marginals.
 from __future__ import annotations
 import numpy as np
 from pyspark.sql import functions as F
-from pyspark.sql.types import *
 
 
 def generate(source_df, n_rows: int, preserve_corr: bool,
-             preserve_nulls: bool, preserve_distributions: bool):
+             preserve_nulls: bool, preserve_distributions: bool,
+             force_categorical: list = None, column_value_pools: dict = None):
+    """
+    force_categorical: column names to sample from real distinct source
+        values regardless of dtype — used for "master data" columns (e.g.
+        currency/country codes) so synthetic values stay referentially valid.
+    column_value_pools: column name -> explicit list of values to sample
+        from uniformly — used for foreign-key columns, populated from the
+        already-generated parent table's primary key values.
+    """
     from pyspark.sql import SparkSession
     spark = SparkSession.getActiveSession()
+    force_categorical = set(force_categorical or [])
+    column_value_pools = column_value_pools or {}
 
     schema = source_df.schema
     numeric_cols = [f.name for f in schema.fields
                     if any(t in str(f.dataType)
-                           for t in ("Int", "Long", "Double", "Float", "Decimal"))]
-    string_cols = [f.name for f in schema.fields if "String" in str(f.dataType)]
+                           for t in ("Int", "Long", "Double", "Float", "Decimal"))
+                    and f.name not in force_categorical and f.name not in column_value_pools]
+    string_cols = [f.name for f in schema.fields
+                   if "String" in str(f.dataType) and f.name not in column_value_pools]
     bool_cols = [f.name for f in schema.fields if "Boolean" in str(f.dataType)]
     date_cols = [f.name for f in schema.fields
                  if any(t in str(f.dataType) for t in ("Date", "Timestamp"))]
+    forced_cat_cols = [f.name for f in schema.fields
+                       if f.name in force_categorical and f.name not in column_value_pools]
 
     np.random.seed(42)
     rows = []
@@ -40,7 +54,7 @@ def generate(source_df, n_rows: int, preserve_corr: bool,
 
     # Collect categorical distributions
     cat_dists = {}
-    for c in string_cols:
+    for c in string_cols + forced_cat_cols:
         total = source_df.count()
         dist = (
             source_df.groupBy(c).count()
@@ -90,7 +104,10 @@ def generate(source_df, n_rows: int, preserve_corr: bool,
             dtype = str(f.dataType)
             null_roll = np.random.random() < null_rates.get(c, 0.0)
 
-            if null_roll and preserve_nulls:
+            if c in column_value_pools:
+                pool = column_value_pools[c]
+                row[c] = pool[int(np.random.randint(0, len(pool)))] if pool else None
+            elif null_roll and preserve_nulls:
                 row[c] = None
             elif c in numeric_samples:
                 val = float(numeric_samples[c][i])
