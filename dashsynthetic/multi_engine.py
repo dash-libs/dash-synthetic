@@ -23,13 +23,13 @@ def generate_multi(graph: RelationshipGraph, table_specs: dict = None) -> dict:
     Generate synthetic DataFrames for every table in `graph`, in dependency
     (foreign-key-safe) order. Returns {table_name: synthetic_df}.
     """
-    from dashsynthetic.engine import generate
-    from pyspark.sql import SparkSession
-    spark = SparkSession.getActiveSession()
-
     issues = graph.validate()
     if issues:
         raise ValueError("Invalid relationship graph: " + "; ".join(issues))
+
+    from dashsynthetic.engine import generate
+    from pyspark.sql import SparkSession
+    spark = SparkSession.getActiveSession()
 
     table_specs = table_specs or {}
     order = graph.generation_order()
