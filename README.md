@@ -65,6 +65,19 @@ results = gen.run()   # {"Customer": df, "Account": df}, generated in dependency
 | dash-relate | Ontology & Lineage for AI |
 | dash-ui | Shared UI components (PyPI: `dash-uis`) |
 
+## Quality & Contributing
+
+- 16 unit tests, zero Spark dependency to run them — `pytest tests/ -v`
+  (the relationship graph, generation ordering, and multi-table
+  orchestration logic are all pure Python and fully covered)
+- Lint-clean (`ruff check dashsynthetic/`), PEP 561 typed (`py.typed`)
+- Every change ships through a reviewed pull request; CI (lint → test on
+  Python 3.9–3.12 → build) gates every PR and every release
+- See [CONTRIBUTING.md](CONTRIBUTING.md) for dev setup,
+  [CHANGELOG.md](CHANGELOG.md) for release history,
+  [SECURITY.md](SECURITY.md) to report a vulnerability, and
+  [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+
 ## License
 
 Apache 2.0
