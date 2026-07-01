@@ -62,7 +62,7 @@ results = gen.run()   # {"Customer": df, "Account": df}, generated in dependency
 | dash-ml | ML Model Monitoring |
 | dash-ingest | Data Ingestion |
 | dash-gov | Data Governance |
-| dash-relate | Ontology & Lineage for AI |
+| dash-ontology | Ontology & Lineage for AI |
 | dash-ui | Shared UI components (PyPI: `dash-uis`) |
 
 ## Quality & Contributing
