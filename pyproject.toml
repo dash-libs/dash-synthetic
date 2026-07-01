@@ -11,13 +11,32 @@ requires-python = ">=3.9"
 license = { text = "Apache-2.0" }
 authors = [{ name = "Darshan Shah", email = "darshan.innovation@icloud.com" }]
 keywords = ["databricks", "synthetic-data", "pyspark", "delta"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Framework :: Jupyter",
+    "Topic :: Software Development :: Libraries",
+    "Typing :: Typed",
+]
 dependencies = ["ipywidgets>=8.0", "numpy>=1.24", "dash-uis>=0.1.0"]
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-cov", "hatch", "pdoc", "ruff"]
 
 [project.urls]
-Homepage = "https://github.com/darshan-innovation/dash-synthetic"
+Homepage = "https://github.com/dash-libs/dash-synthetic"
+Repository = "https://github.com/dash-libs/dash-synthetic"
+Issues = "https://github.com/dash-libs/dash-synthetic/issues"
+Changelog = "https://github.com/dash-libs/dash-synthetic/blob/main/CHANGELOG.md"
 
 [tool.hatch.version]
 path = "dashsynthetic/__init__.py"
