@@ -135,8 +135,8 @@ class RelationshipGraph:
         print(f"Foreign keys: {len(self._foreign_keys)}")
         issues = self.validate()
         if issues:
-            print(f"⚠️  {len(issues)} validation issue(s):")
+            print(f"{len(issues)} validation issue(s):")
             for i in issues:
                 print(f"   - {i}")
         else:
-            print(f"✅ Validation passed — generation order: {' → '.join(self.generation_order())}")
+            print(f"Validation passed — generation order: {' → '.join(self.generation_order())}")
