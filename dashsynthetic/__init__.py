@@ -4,7 +4,7 @@ Launch the UI with dashsynthetic.launch() inside a Databricks notebook.
 """
 from dashsynthetic.generator import MultiTableGenerator, SyntheticGenerator
 from dashsynthetic.relationships import RelationshipGraph
-from dashsynthetic.ui import launch
+from dashsynthetic.ui import env_setup, launch
 
 __version__ = "0.1.5"
-__all__ = ["SyntheticGenerator", "MultiTableGenerator", "RelationshipGraph", "launch"]
+__all__ = ["SyntheticGenerator", "MultiTableGenerator", "RelationshipGraph", "env_setup", "launch"]

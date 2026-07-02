@@ -1,6 +1,24 @@
 """DashSynthetic interactive UI for Databricks notebooks."""
 from __future__ import annotations
 
+_LIBRARY = "dashsynthetic"
+
+
+def env_setup() -> None:
+    """Open the environment setup panel — where should dashsynthetic
+    read/write its configs? Defaults to the notebook's current working
+    directory if never called."""
+    try:
+        import dashui
+        from IPython.display import display
+    except ImportError:
+        raise RuntimeError("ipywidgets required. Run: %pip install ipywidgets") from None
+
+    display(dashui.card([
+        dashui.header("DashSynthetic — Environment Setup", library=_LIBRARY),
+        dashui.env_setup_panel(_LIBRARY).widget,
+    ]))
+
 
 def launch():
     try:
@@ -15,9 +33,14 @@ def launch():
     tab.set_title(0, "Single Table")
     tab.set_title(1, "Multi-Table Relationships")
 
+    env_accordion = w.Accordion(children=[dashui.env_setup_panel(_LIBRARY).widget])
+    env_accordion.set_title(0, "Environment setup")
+    env_accordion.selected_index = None
+
     ui = dashui.card([
         dashui.header("DashSynthetic — Synthetic Data Generation",
                       library="dashsynthetic"),
+        env_accordion,
         tab,
     ])
     display(ui)
@@ -26,12 +49,16 @@ def launch():
 def _build_single_table_tab(w):
     import dashui
 
+    saved = dashui.load_config(_LIBRARY, name="single_table", defaults={
+        "n_rows": 10000, "preserve_corr": True, "preserve_nulls": True, "preserve_dist": True,
+    })
+
     src = dashui.source_selector()
 
-    n_rows = w.IntText(value=10000, description="Rows to generate:", min=1)
-    preserve_corr = w.Checkbox(value=True, description="Preserve correlation structure")
-    preserve_nulls = w.Checkbox(value=True, description="Preserve missing value patterns")
-    preserve_dist = w.Checkbox(value=True, description="Preserve marginal distributions")
+    n_rows = w.IntText(value=saved["n_rows"], description="Rows to generate:", min=1)
+    preserve_corr = w.Checkbox(value=saved["preserve_corr"], description="Preserve correlation structure")
+    preserve_nulls = w.Checkbox(value=saved["preserve_nulls"], description="Preserve missing value patterns")
+    preserve_dist = w.Checkbox(value=saved["preserve_dist"], description="Preserve marginal distributions")
 
     save_toggle = w.Checkbox(value=False, description="Save to Delta table")
     save_input = w.Text(placeholder="catalog.schema.synthetic_output", description="Output table:", disabled=True)
@@ -40,6 +67,15 @@ def _build_single_table_tab(w):
     profile_btn = dashui.action_button("Profile source", style="info")
     run_btn = dashui.action_button("Generate Synthetic Data", style="success")
     output = dashui.output_panel()
+
+    def _save_state() -> None:
+        try:
+            dashui.save_config(_LIBRARY, {
+                "n_rows": n_rows.value, "preserve_corr": preserve_corr.value,
+                "preserve_nulls": preserve_nulls.value, "preserve_dist": preserve_dist.value,
+            }, name="single_table")
+        except Exception:
+            pass  # persistence is a convenience, never block the actual operation on it
 
     def on_profile(b):
         with output:
@@ -56,6 +92,7 @@ def _build_single_table_tab(w):
     def on_run(b):
         with output:
             output.clear_output()
+            _save_state()
             try:
                 gen = _build_generator(src)
                 gen.set_volume(n_rows.value) \
@@ -94,8 +131,14 @@ def _build_relationships_tab(w):
     """
     import dashui
 
-    tables: list[dict] = []
-    foreign_keys: list[dict] = []
+    saved = dashui.load_config(_LIBRARY, name="relationships", defaults={
+        "tables": [], "foreign_keys": [], "n_rows": 10000,
+        "preserve_corr": True, "preserve_nulls": True, "preserve_dist": True,
+        "output_prefix": "",
+    })
+
+    tables: list[dict] = list(saved["tables"])
+    foreign_keys: list[dict] = list(saved["foreign_keys"])
 
     # ── Tables ────────────────────────────────────────────────────────────
     t_name = w.Text(description="Logical name:", placeholder="Customer")
@@ -107,8 +150,19 @@ def _build_relationships_tab(w):
         lambda i, t: f"  {i}. {t['name']} → {t['table']}  (PK: {t['pk'] or '—'}, master data: {', '.join(t['master']) or '—'})"
     )
 
-    from_table_dd = w.Dropdown(options=[], description="From table:")
-    to_table_dd = w.Dropdown(options=[], description="To table:")
+    from_table_dd = w.Dropdown(options=[t["name"] for t in tables], description="From table:")
+    to_table_dd = w.Dropdown(options=[t["name"] for t in tables], description="To table:")
+
+    def _save_state() -> None:
+        try:
+            dashui.save_config(_LIBRARY, {
+                "tables": tables, "foreign_keys": foreign_keys,
+                "n_rows": n_rows.value, "preserve_corr": preserve_corr.value,
+                "preserve_nulls": preserve_nulls.value, "preserve_dist": preserve_dist.value,
+                "output_prefix": output_prefix.value,
+            }, name="relationships")
+        except Exception:
+            pass  # persistence is a convenience, never block the actual operation on it
 
     def on_add_table(b):
         name = t_name.value.strip()
@@ -123,6 +177,7 @@ def _build_relationships_tab(w):
         from_table_dd.options = names
         to_table_dd.options = names
         t_name.value = t_table.value = t_pk.value = t_master.value = ""
+        _save_state()
 
     add_table_btn.on_click(on_add_table)
 
@@ -143,19 +198,26 @@ def _build_relationships_tab(w):
         })
         render_fks(foreign_keys)
         from_col.value = to_col.value = ""
+        _save_state()
 
     add_fk_btn.on_click(on_add_fk)
 
     # ── Generation settings (applied to every table) ────────────────────
-    n_rows = w.IntText(value=10000, description="Rows per table:", min=1)
-    preserve_corr = w.Checkbox(value=True, description="Preserve correlation structure")
-    preserve_nulls = w.Checkbox(value=True, description="Preserve missing value patterns")
-    preserve_dist = w.Checkbox(value=True, description="Preserve marginal distributions")
-    output_prefix = w.Text(description="Output schema:", placeholder="catalog.schema (optional — leave blank to skip saving)")
+    n_rows = w.IntText(value=saved["n_rows"], description="Rows per table:", min=1)
+    preserve_corr = w.Checkbox(value=saved["preserve_corr"], description="Preserve correlation structure")
+    preserve_nulls = w.Checkbox(value=saved["preserve_nulls"], description="Preserve missing value patterns")
+    preserve_dist = w.Checkbox(value=saved["preserve_dist"], description="Preserve marginal distributions")
+    output_prefix = w.Text(
+        value=saved["output_prefix"], description="Output schema:",
+        placeholder="catalog.schema (optional — leave blank to skip saving)",
+    )
 
     validate_btn = dashui.action_button("Validate / Show Order", style="warning")
     run_btn = dashui.action_button("Generate All Tables", style="success")
     output = dashui.output_panel()
+
+    render_tables(tables)
+    render_fks(foreign_keys)
 
     def _build_graph():
         from dashsynthetic.relationships import RelationshipGraph
@@ -169,6 +231,7 @@ def _build_relationships_tab(w):
     def on_validate(b):
         with output:
             output.clear_output()
+            _save_state()
             try:
                 _build_graph().summary()
             except Exception as e:
@@ -177,6 +240,7 @@ def _build_relationships_tab(w):
     def on_run(b):
         with output:
             output.clear_output()
+            _save_state()
             try:
                 from dashsynthetic.generator import MultiTableGenerator
                 graph = _build_graph()
