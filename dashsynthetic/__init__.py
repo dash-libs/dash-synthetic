@@ -6,5 +6,5 @@ from dashsynthetic.generator import MultiTableGenerator, SyntheticGenerator
 from dashsynthetic.relationships import RelationshipGraph
 from dashsynthetic.ui import launch
 
-__version__ = "0.1.4"
+__version__ = "0.1.5"
 __all__ = ["SyntheticGenerator", "MultiTableGenerator", "RelationshipGraph", "launch"]
