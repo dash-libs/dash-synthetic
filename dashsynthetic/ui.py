@@ -17,7 +17,7 @@ def launch():
 
     ui = dashui.card([
         dashui.header("DashSynthetic — Synthetic Data Generation",
-                      library="dashsynthetic", emoji="🧬"),
+                      library="dashsynthetic"),
         tab,
     ])
     display(ui)
@@ -37,8 +37,8 @@ def _build_single_table_tab(w):
     save_input = w.Text(placeholder="catalog.schema.synthetic_output", description="Output table:", disabled=True)
     save_toggle.observe(lambda c: setattr(save_input, "disabled", not c["new"]), names="value")
 
-    profile_btn = dashui.action_button("Profile source", style="info", emoji="🔍")
-    run_btn = dashui.action_button("Generate Synthetic Data", style="success", emoji="▶")
+    profile_btn = dashui.action_button("Profile source", style="info")
+    run_btn = dashui.action_button("Generate Synthetic Data", style="success")
     output = dashui.output_panel()
 
     def on_profile(b):
@@ -51,7 +51,7 @@ def _build_single_table_tab(w):
                 print(json.dumps({k: v for k, v in list(profile["columns"].items())[:5]}, indent=2, default=str))
                 print(f"\n... {len(profile['columns'])} columns total, {profile['total_rows']:,} rows")
             except Exception as e:
-                print(f"❌ {e}")
+                print(f"Error: {e}")
 
     def on_run(b):
         with output:
@@ -65,10 +65,10 @@ def _build_single_table_tab(w):
                 if save_toggle.value and save_input.value.strip():
                     gen.output_to(save_input.value.strip())
                 syn_df = gen.run()
-                print(f"✅ Generated {syn_df.count():,} synthetic rows")
+                print(f"Generated {syn_df.count():,} synthetic rows")
                 syn_df.show(5, truncate=True)
             except Exception as e:
-                print(f"❌ {e}")
+                print(f"Error: {e}")
 
     profile_btn.on_click(on_profile)
     run_btn.on_click(on_run)
@@ -102,7 +102,7 @@ def _build_relationships_tab(w):
     t_table = w.Text(description="UC Table:", placeholder="catalog.schema.dim_customer")
     t_pk = w.Text(description="Primary key:", placeholder="customer_id")
     t_master = w.Text(description="Master data cols:", placeholder="country_code, currency_code (comma separated)")
-    add_table_btn = dashui.action_button("Add Table", style="info", emoji="＋")
+    add_table_btn = dashui.action_button("Add Table", style="info")
     tables_output, render_tables = dashui.running_list(
         lambda i, t: f"  {i}. {t['name']} → {t['table']}  (PK: {t['pk'] or '—'}, master data: {', '.join(t['master']) or '—'})"
     )
@@ -129,7 +129,7 @@ def _build_relationships_tab(w):
     # ── Foreign keys ─────────────────────────────────────────────────────
     from_col = w.Text(description="From column:", placeholder="customer_id")
     to_col = w.Text(description="To column:", placeholder="customer_id")
-    add_fk_btn = dashui.action_button("Add Foreign Key", style="info", emoji="＋")
+    add_fk_btn = dashui.action_button("Add Foreign Key", style="info")
     fks_output, render_fks = dashui.running_list(
         lambda i, fk: f"  {i}. {fk['from_table']}.{fk['from_column']} → {fk['to_table']}.{fk['to_column']}"
     )
@@ -153,8 +153,8 @@ def _build_relationships_tab(w):
     preserve_dist = w.Checkbox(value=True, description="Preserve marginal distributions")
     output_prefix = w.Text(description="Output schema:", placeholder="catalog.schema (optional — leave blank to skip saving)")
 
-    validate_btn = dashui.action_button("Validate / Show Order", style="warning", emoji="✅")
-    run_btn = dashui.action_button("Generate All Tables", style="success", emoji="▶")
+    validate_btn = dashui.action_button("Validate / Show Order", style="warning")
+    run_btn = dashui.action_button("Generate All Tables", style="success")
     output = dashui.output_panel()
 
     def _build_graph():
@@ -172,7 +172,7 @@ def _build_relationships_tab(w):
             try:
                 _build_graph().summary()
             except Exception as e:
-                print(f"❌ {e}")
+                print(f"Error: {e}")
 
     def on_run(b):
         with output:
@@ -183,7 +183,7 @@ def _build_relationships_tab(w):
                 issues = graph.validate()
                 if issues:
                     for i in issues:
-                        print(f"⚠️  {i}")
+                        print(f"{i}")
                     return
                 gen = MultiTableGenerator(graph)
                 prefix = output_prefix.value.strip()
@@ -195,11 +195,11 @@ def _build_relationships_tab(w):
                         output_table=output_table,
                     )
                 results = gen.run()
-                print(f"✅ Generated {len(results)} table(s) in order: {' → '.join(graph.generation_order())}")
+                print(f"Generated {len(results)} table(s) in order: {' → '.join(graph.generation_order())}")
                 for name, df in results.items():
                     print(f"  - {name}: {df.count():,} rows")
             except Exception as e:
-                print(f"❌ {e}")
+                print(f"Error: {e}")
 
     validate_btn.on_click(on_validate)
     run_btn.on_click(on_run)
